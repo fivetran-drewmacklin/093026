@@ -1,13 +1,46 @@
 version: 2
 
 models:
-  - name: fact_order_items
+  - name: order_items
     description: >
-      Order-line fact enriched with matching part and supplier attributes when
-      available. One row per order and line number.
+      Order-line mart joining LINEITEM to its ORDERS header. The grain is one
+      row per order and line number. Source load timestamps are retained as
+      L_LOADED_AT and O_LOADED_AT to distinguish line and order ingestion.
     columns:
       - name: L_ORDERKEY
-        description: Order identifier for the line item.
+        description: Order identifier and first component of the order-line grain.
+      - name: L_LINENUMBER
+        description: Line number and second component of the order-line grain.
+      - name: O_ORDERKEY
+        description: Matched order-header identifier.
+      - name: L_LOADED_AT
+        description: Timestamp when the source line item was loaded.
+      - name: O_LOADED_AT
+        description: Timestamp when the source order header was loaded.
+
+  - name: part_suppliers
+    description: >
+      Part-supplier mart combining the PARTSUPP bridge with descriptive part
+      and supplier attributes. The grain is one row per part and supplier pair.
+    columns:
+      - name: PS_PARTKEY
+        description: Part identifier and first component of the model grain.
+      - name: PS_SUPPKEY
+        description: Supplier identifier and second component of the model grain.
+      - name: PS_SUPPLYCOST
+        description: Cost charged by this supplier for the associated part.
+      - name: PS_AVAILQTY
+        description: Quantity of the associated part available from this supplier.
+
+  - name: fact_order_items
+    description: >
+      Order-line fact enriched with matching part and supplier attributes from
+      the smaller TPCH_SF001 reference dataset. The grain is one row per order
+      and line number. All order lines are retained; enrichment columns are null
+      when the part-supplier pair has no TPCH_SF001 match.
+    columns:
+      - name: L_ORDERKEY
+        description: Order identifier and first component of the fact grain.
         data_tests:
           - not_null
           - relationships:
@@ -15,18 +48,18 @@ models:
                 to: ref('order_items')
                 field: L_ORDERKEY
       - name: L_LINENUMBER
-        description: Line number within the order.
+        description: Line number and second component of the fact grain.
         data_tests:
           - not_null
       - name: PS_PARTKEY
-        description: Matched part identifier from the part-supplier mart; null when unmatched.
+        description: Matched reference part identifier; null when enrichment is unavailable.
         data_tests:
           - relationships:
               arguments:
                 to: ref('part_suppliers')
                 field: PS_PARTKEY
       - name: PS_SUPPKEY
-        description: Matched supplier identifier from the part-supplier mart; null when unmatched.
+        description: Matched reference supplier identifier; null when enrichment is unavailable.
         data_tests:
           - relationships:
               arguments:

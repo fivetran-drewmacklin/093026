@@ -2,16 +2,113 @@ version: 2
 
 sources:
   - name: TPCH_NOW
+    description: >
+      Continuously refreshed TPC-H order and line-item data used as the source
+      for order analytics. Freshness is measured from each table's LOADED_AT
+      timestamp and warns when data is more than two days old.
     database: SADEMOSRC__SOURCE_DATA
     schema: TPCH_NOW
+    config:
+      freshness:
+        warn_after: {count: 2, period: day}
+      loaded_at_field: LOADED_AT
     tables:
       - name: LINEITEM
+        description: >
+          Order-line records at one row per order and line number. Contains the
+          selected part and supplier, pricing inputs, fulfillment dates, and
+          return and shipping statuses.
+        columns:
+          - name: L_ORDERKEY
+            description: Order identifier; joins each line to TPCH_NOW.ORDERS.
+            data_tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('TPCH_NOW', 'ORDERS')
+                    field: O_ORDERKEY
+          - name: L_LINENUMBER
+            description: Sequence number of the line within its order.
+            data_tests:
+              - not_null
+          - name: L_RETURNFLAG
+            description: Return state assigned to the order line.
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ['A', 'N', 'R']
+          - name: L_LINESTATUS
+            description: Fulfillment state of the individual order line.
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ['F', 'O']
+
       - name: ORDERS
+        description: >
+          Order headers at one row per order, including customer, status,
+          order date, priority, and total price attributes.
+        columns:
+          - name: O_ORDERKEY
+            description: Primary key for an order.
+            data_tests:
+              - unique
+              - not_null
+          - name: O_ORDERSTATUS
+            description: "{{ doc('tpch_order_status') }}"
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: ['F', 'O', 'P']
+          - name: O_TOTALPRICE
+            description: Total order price supplied by TPC-H; expected to be positive.
+            data_tests:
+              - not_null
 
   - name: TPCH_SF001
+    description: >
+      TPC-H scale-factor 0.01 reference data for parts, suppliers, and their
+      commercial relationships. This smaller dataset enriches matching order
+      lines but does not cover every part and supplier in TPCH_NOW.
     database: RAW
     schema: TPCH_SF001
     tables:
       - name: PARTSUPP
+        description: >
+          Bridge between parts and suppliers at one row per part-supplier pair,
+          including available quantity and supply cost.
+        columns:
+          - name: PS_PARTKEY
+            description: Part identifier; joins to TPCH_SF001.PART.
+            data_tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('TPCH_SF001', 'PART')
+                    field: P_PARTKEY
+          - name: PS_SUPPKEY
+            description: Supplier identifier; joins to TPCH_SF001.SUPPLIER.
+            data_tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('TPCH_SF001', 'SUPPLIER')
+                    field: S_SUPPKEY
+
       - name: PART
+        description: Product reference data at one row per part.
+        columns:
+          - name: P_PARTKEY
+            description: Primary key for a part.
+            data_tests:
+              - unique
+              - not_null
+
       - name: SUPPLIER
+        description: Supplier reference data at one row per supplier.
+        columns:
+          - name: S_SUPPKEY
+            description: Primary key for a supplier.
+            data_tests:
+              - unique
+              - not_null
