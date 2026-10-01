@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: TPCH_NOW
+    database: SADEMOSRC__SOURCE_DATA
+    schema: TPCH_NOW
+    tables:
+      - name: LINEITEM
+      - name: ORDERS
+
+  - name: TPCH_SF001
+    database: RAW
+    schema: TPCH_SF001
+    tables:
+      - name: PARTSUPP
+      - name: PART
+      - name: SUPPLIER

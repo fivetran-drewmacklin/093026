@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: fact_order_items
+    description: >
+      Order-line fact enriched with matching part and supplier attributes when
+      available. One row per order and line number.
+    columns:
+      - name: L_ORDERKEY
+        description: Order identifier for the line item.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('order_items')
+                field: L_ORDERKEY
+      - name: L_LINENUMBER
+        description: Line number within the order.
+        data_tests:
+          - not_null
+      - name: PS_PARTKEY
+        description: Matched part identifier from the part-supplier mart; null when unmatched.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('part_suppliers')
+                field: PS_PARTKEY
+      - name: PS_SUPPKEY
+        description: Matched supplier identifier from the part-supplier mart; null when unmatched.
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('part_suppliers')
+                field: PS_SUPPKEY
