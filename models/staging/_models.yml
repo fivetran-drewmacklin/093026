@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: ORDERS
+    description: >
+      Staging copy of TPCH_NOW order headers. The model preserves the source
+      column names and grain of one row per O_ORDERKEY for downstream marts.
+    columns:
+      - name: O_ORDERKEY
+        description: Primary key for an order.
+      - name: O_CUSTKEY
+        description: Customer that placed the order.
+      - name: O_ORDERSTATUS
+        description: "{{ doc('tpch_order_status') }}"
+      - name: O_TOTALPRICE
+        description: Total order price supplied by TPC-H; expected to be positive.
+      - name: O_ORDERDATE
+        description: Date on which the order was placed.
+      - name: LOADED_AT
+        description: Timestamp when the source order record was loaded.
