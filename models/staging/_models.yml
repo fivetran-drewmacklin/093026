@@ -1,20 +1,134 @@
 version: 2
 
 models:
+  - name: LINEITEM
+    description: >
+      Staging copy of TPCH_NOW order lines. The model preserves the source
+      column names and grain of one row per order and line number.
+    columns:
+      - name: L_ORDERKEY
+        data_type: NUMBER
+      - name: L_PARTKEY
+        data_type: NUMBER
+      - name: L_SUPPKEY
+        data_type: NUMBER
+      - name: L_LINENUMBER
+        data_type: NUMBER
+      - name: L_QUANTITY
+        data_type: NUMBER
+      - name: L_EXTENDEDPRICE
+        data_type: NUMBER
+      - name: L_DISCOUNT
+        data_type: NUMBER
+      - name: L_TAX
+        data_type: NUMBER
+      - name: L_RETURNFLAG
+        data_type: TEXT
+      - name: L_LINESTATUS
+        data_type: TEXT
+      - name: L_SHIPINSTRUCT
+        data_type: TEXT
+      - name: L_SHIPMODE
+        data_type: TEXT
+      - name: L_COMMENT
+        data_type: TEXT
+      - name: L_SHIPDATE
+        data_type: DATE
+      - name: L_COMMITDATE
+        data_type: DATE
+      - name: L_RECEIPTDATE
+        data_type: DATE
+      - name: LOADED_AT
+        data_type: TIMESTAMP_LTZ
+
   - name: ORDERS
     description: >
       Staging copy of TPCH_NOW order headers. The model preserves the source
       column names and grain of one row per O_ORDERKEY for downstream marts.
     columns:
       - name: O_ORDERKEY
+        data_type: NUMBER
         description: Primary key for an order.
       - name: O_CUSTKEY
+        data_type: NUMBER
         description: Customer that placed the order.
       - name: O_ORDERSTATUS
+        data_type: TEXT
         description: "{{ doc('tpch_order_status') }}"
       - name: O_TOTALPRICE
+        data_type: NUMBER
         description: Total order price supplied by TPC-H; expected to be positive.
       - name: O_ORDERDATE
+        data_type: DATE
         description: Date on which the order was placed.
+      - name: O_ORDERTIME
+        data_type: TIMESTAMP_NTZ
+      - name: O_ORDERPRIORITY
+        data_type: TEXT
+      - name: O_CLERK
+        data_type: TEXT
+      - name: O_SHIPPRIORITY
+        data_type: NUMBER
+      - name: O_COMMENT
+        data_type: TEXT
       - name: LOADED_AT
+        data_type: TIMESTAMP_LTZ
         description: Timestamp when the source order record was loaded.
+
+  - name: PARTSUPP
+    description: >
+      Staging copy of the TPCH_SF001 part-supplier bridge at one row per part
+      and supplier pair.
+    columns:
+      - name: PS_PARTKEY
+        data_type: NUMBER
+      - name: PS_SUPPKEY
+        data_type: NUMBER
+      - name: PS_AVAILQTY
+        data_type: NUMBER
+      - name: PS_SUPPLYCOST
+        data_type: NUMBER
+      - name: PS_COMMENT
+        data_type: TEXT
+
+  - name: PART
+    description: >
+      Staging copy of TPCH_SF001 part reference data at one row per part.
+    columns:
+      - name: P_PARTKEY
+        data_type: NUMBER
+      - name: P_NAME
+        data_type: TEXT
+      - name: P_MFGR
+        data_type: TEXT
+      - name: P_BRAND
+        data_type: TEXT
+      - name: P_TYPE
+        data_type: TEXT
+      - name: P_SIZE
+        data_type: NUMBER
+      - name: P_CONTAINER
+        data_type: TEXT
+      - name: P_RETAILPRICE
+        data_type: NUMBER
+      - name: P_COMMENT
+        data_type: TEXT
+
+  - name: SUPPLIER
+    description: >
+      Staging copy of TPCH_SF001 supplier reference data at one row per supplier.
+    columns:
+      - name: S_SUPPKEY
+        data_type: NUMBER
+      - name: S_NAME
+        data_type: TEXT
+      - name: S_ADDRESS
+        data_type: TEXT
+      - name: S_NATIONKEY
+        data_type: NUMBER
+      - name: S_PHONE
+        data_type: TEXT
+      - name: S_ACCTBAL
+        data_type: NUMBER
+      - name: S_COMMENT
+        data_type: TEXT
