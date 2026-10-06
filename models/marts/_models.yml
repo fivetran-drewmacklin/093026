@@ -8,14 +8,65 @@ models:
       L_LOADED_AT and O_LOADED_AT to distinguish line and order ingestion.
     columns:
       - name: L_ORDERKEY
+        data_type: NUMBER
         description: Order identifier and first component of the order-line grain.
+      - name: L_PARTKEY
+        data_type: NUMBER
+      - name: L_SUPPKEY
+        data_type: NUMBER
       - name: L_LINENUMBER
+        data_type: NUMBER
         description: Line number and second component of the order-line grain.
-      - name: O_ORDERKEY
-        description: Matched order-header identifier.
+      - name: L_QUANTITY
+        data_type: NUMBER
+      - name: L_EXTENDEDPRICE
+        data_type: NUMBER
+      - name: L_DISCOUNT
+        data_type: NUMBER
+      - name: L_TAX
+        data_type: NUMBER
+      - name: L_RETURNFLAG
+        data_type: TEXT
+      - name: L_LINESTATUS
+        data_type: TEXT
+      - name: L_SHIPINSTRUCT
+        data_type: TEXT
+      - name: L_SHIPMODE
+        data_type: TEXT
+      - name: L_COMMENT
+        data_type: TEXT
+      - name: L_SHIPDATE
+        data_type: DATE
+      - name: L_COMMITDATE
+        data_type: DATE
+      - name: L_RECEIPTDATE
+        data_type: DATE
       - name: L_LOADED_AT
+        data_type: TIMESTAMP_LTZ
         description: Timestamp when the source line item was loaded.
+      - name: O_ORDERKEY
+        data_type: NUMBER
+        description: Matched order-header identifier.
+      - name: O_CUSTKEY
+        data_type: NUMBER
+      - name: O_ORDERSTATUS
+        data_type: TEXT
+      - name: O_TOTALPRICE
+        data_type: NUMBER
+      - name: O_ORDERDATE
+        data_type: DATE
+      - name: O_ORDERTIME
+        data_type: TIMESTAMP_NTZ
+      - name: O_ORDERPRIORITY
+        data_type: TEXT
+      - name: O_CLERK
+        data_type: TEXT
+      - name: O_SHIPPRIORITY
+        data_type: NUMBER
+      - name: O_COMMENT
+        data_type: TEXT
       - name: O_LOADED_AT
+        data_type: TIMESTAMP_LTZ
         description: Timestamp when the source order header was loaded.
 
   - name: part_suppliers
@@ -24,13 +75,51 @@ models:
       and supplier attributes. The grain is one row per part and supplier pair.
     columns:
       - name: PS_PARTKEY
+        data_type: NUMBER
         description: Part identifier and first component of the model grain.
       - name: PS_SUPPKEY
+        data_type: NUMBER
         description: Supplier identifier and second component of the model grain.
-      - name: PS_SUPPLYCOST
-        description: Cost charged by this supplier for the associated part.
       - name: PS_AVAILQTY
+        data_type: NUMBER
         description: Quantity of the associated part available from this supplier.
+      - name: PS_SUPPLYCOST
+        data_type: NUMBER
+        description: Cost charged by this supplier for the associated part.
+      - name: PS_COMMENT
+        data_type: TEXT
+      - name: P_PARTKEY
+        data_type: NUMBER
+      - name: P_NAME
+        data_type: TEXT
+      - name: P_MFGR
+        data_type: TEXT
+      - name: P_BRAND
+        data_type: TEXT
+      - name: P_TYPE
+        data_type: TEXT
+      - name: P_SIZE
+        data_type: NUMBER
+      - name: P_CONTAINER
+        data_type: TEXT
+      - name: P_RETAILPRICE
+        data_type: NUMBER
+      - name: P_COMMENT
+        data_type: TEXT
+      - name: S_SUPPKEY
+        data_type: NUMBER
+      - name: S_NAME
+        data_type: TEXT
+      - name: S_ADDRESS
+        data_type: TEXT
+      - name: S_NATIONKEY
+        data_type: NUMBER
+      - name: S_PHONE
+        data_type: TEXT
+      - name: S_ACCTBAL
+        data_type: NUMBER
+      - name: S_COMMENT
+        data_type: TEXT
 
   - name: fact_order_items
     description: >
@@ -40,6 +129,7 @@ models:
       when the part-supplier pair has no TPCH_SF001 match.
     columns:
       - name: L_ORDERKEY
+        data_type: NUMBER
         description: Order identifier and first component of the fact grain.
         data_tests:
           - not_null
@@ -47,11 +137,65 @@ models:
               arguments:
                 to: ref('order_items')
                 field: L_ORDERKEY
+      - name: L_PARTKEY
+        data_type: NUMBER
+      - name: L_SUPPKEY
+        data_type: NUMBER
       - name: L_LINENUMBER
+        data_type: NUMBER
         description: Line number and second component of the fact grain.
         data_tests:
           - not_null
+      - name: L_QUANTITY
+        data_type: NUMBER
+      - name: L_EXTENDEDPRICE
+        data_type: NUMBER
+      - name: L_DISCOUNT
+        data_type: NUMBER
+      - name: L_TAX
+        data_type: NUMBER
+      - name: L_RETURNFLAG
+        data_type: TEXT
+      - name: L_LINESTATUS
+        data_type: TEXT
+      - name: L_SHIPINSTRUCT
+        data_type: TEXT
+      - name: L_SHIPMODE
+        data_type: TEXT
+      - name: L_COMMENT
+        data_type: TEXT
+      - name: L_SHIPDATE
+        data_type: DATE
+      - name: L_COMMITDATE
+        data_type: DATE
+      - name: L_RECEIPTDATE
+        data_type: DATE
+      - name: L_LOADED_AT
+        data_type: TIMESTAMP_LTZ
+      - name: O_ORDERKEY
+        data_type: NUMBER
+      - name: O_CUSTKEY
+        data_type: NUMBER
+      - name: O_ORDERSTATUS
+        data_type: TEXT
+      - name: O_TOTALPRICE
+        data_type: NUMBER
+      - name: O_ORDERDATE
+        data_type: DATE
+      - name: O_ORDERTIME
+        data_type: TIMESTAMP_NTZ
+      - name: O_ORDERPRIORITY
+        data_type: TEXT
+      - name: O_CLERK
+        data_type: TEXT
+      - name: O_SHIPPRIORITY
+        data_type: NUMBER
+      - name: O_COMMENT
+        data_type: TEXT
+      - name: O_LOADED_AT
+        data_type: TIMESTAMP_LTZ
       - name: PS_PARTKEY
+        data_type: NUMBER
         description: Matched reference part identifier; null when enrichment is unavailable.
         data_tests:
           - relationships:
@@ -59,9 +203,48 @@ models:
                 to: ref('part_suppliers')
                 field: PS_PARTKEY
       - name: PS_SUPPKEY
+        data_type: NUMBER
         description: Matched reference supplier identifier; null when enrichment is unavailable.
         data_tests:
           - relationships:
               arguments:
                 to: ref('part_suppliers')
                 field: PS_SUPPKEY
+      - name: PS_AVAILQTY
+        data_type: NUMBER
+      - name: PS_SUPPLYCOST
+        data_type: NUMBER
+      - name: PS_COMMENT
+        data_type: TEXT
+      - name: P_PARTKEY
+        data_type: NUMBER
+      - name: P_NAME
+        data_type: TEXT
+      - name: P_MFGR
+        data_type: TEXT
+      - name: P_BRAND
+        data_type: TEXT
+      - name: P_TYPE
+        data_type: TEXT
+      - name: P_SIZE
+        data_type: NUMBER
+      - name: P_CONTAINER
+        data_type: TEXT
+      - name: P_RETAILPRICE
+        data_type: NUMBER
+      - name: P_COMMENT
+        data_type: TEXT
+      - name: S_SUPPKEY
+        data_type: NUMBER
+      - name: S_NAME
+        data_type: TEXT
+      - name: S_ADDRESS
+        data_type: TEXT
+      - name: S_NATIONKEY
+        data_type: NUMBER
+      - name: S_PHONE
+        data_type: TEXT
+      - name: S_ACCTBAL
+        data_type: NUMBER
+      - name: S_COMMENT
+        data_type: TEXT
